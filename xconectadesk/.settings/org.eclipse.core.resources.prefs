@@ -1,0 +1,10 @@
+eclipse.preferences.version=1
+encoding//src/com/finkok/facturacion/stamp/Application.java=UTF-8
+encoding//src/com/finkok/facturacion/stamp/ApplicationStub.java=UTF-8
+encoding//src/com/finkok/facturacion/stamp/StampSOAP.java=UTF-8
+encoding//src/com/finkok/facturacion/stamp/StampSOAPLocator.java=UTF-8
+encoding//src/views/core/soap/services/apps/AcuseRecepcionCFDI.java=UTF-8
+encoding//src/views/core/soap/services/apps/Incidencia.java=UTF-8
+encoding//src/views/core/soap/services/apps/QueryPendingResult.java=UTF-8
+encoding/<project>=UTF-8
+encoding/src=UTF-8
