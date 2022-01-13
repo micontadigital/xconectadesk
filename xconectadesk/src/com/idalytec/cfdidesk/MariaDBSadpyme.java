@@ -34,7 +34,7 @@ public class MariaDBSadpyme {
 	    		
 	    		System.out.println(db);
 	    		
-	    		host = "idalytec.com";
+	    		//host = "idalytec.com";
 
 	    		
 	    		System.out.println("host " + host);
@@ -63,7 +63,7 @@ public class MariaDBSadpyme {
 	    		
 	    		//host = "192.168.15.200";
 	    		
-	    		host = "idalytec.com";
+	    		//host = "idalytec.com";
 	    		
 	    		Class.forName("org.mariadb.jdbc.Driver");
 	    		String cadena = "jdbc:mysql://" + host + ":3306";

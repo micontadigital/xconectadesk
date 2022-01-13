@@ -34,7 +34,7 @@ import com.finkok.facturacion.stamp.StampSOAPLocator;
 import com.idalytec.sadpyme.formatos.GenerarComprobante1;
 import com.idalytec.sadpyme.formatos.GenerarComprobante2;
 
-import mx.bigdata.sat.cfdi.CFDv32;
+//import mx.bigdata.sat.cfdi.CFDv32;
 import mx.gob.sat.cfd._3.CFDv33;
 import mx.gob.sat.cfd._3.Comprobante;
 import mx.gob.sat.cfd._3.Comprobante.Complemento;
@@ -331,6 +331,7 @@ public class UploadFacturaPagoServlet extends HttpServlet {
 	
 							if (generada){
 	
+								/*
 	
 								mx.bigdata.sat.cfdi.v32.schema.Comprobante f = CFDv32.newComprobante(new FileInputStream(file));
 				            	
@@ -427,7 +428,7 @@ public class UploadFacturaPagoServlet extends HttpServlet {
 				            		
 				            		
 				            	}
-								
+								*/
 							
 							}
 		

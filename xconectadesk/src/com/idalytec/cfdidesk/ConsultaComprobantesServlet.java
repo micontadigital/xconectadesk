@@ -17,22 +17,37 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.json.JSONObject;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.google.gson.JsonObject;
+import org.json.simple.JSONArray;
 
-import mx.bigdata.sat.cfdi.CFDv32;
+//import mx.bigdata.sat.cfdi.CFDv32;
 import mx.gob.sat.cfd._3.CFDv33;
 import mx.gob.sat.cfd._3.Comprobante;
 import mx.gob.sat.cfd._3.Comprobante.Complemento;
@@ -95,7 +110,14 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         try {
         	st = conexion.createStatement();
         	
-        	sql = "select id from usuarios where correo='" + correo + "' and password='" + pass + "'" ;
+        	//sql = "select id from usuarios where correo='" + correo + "' and password='" + pass + "'" ;
+        	
+        	
+        	
+        	sql = ("select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local, id_sucursal, id_terminal"
+					+ ", id_usuario_local, tipo, woo_activo from usuarios "
+					+ "where usuario='" + correo + "' and pass='" + pass + "'" );
+        	
         	
         	rs = st.executeQuery(sql);
         	
@@ -105,6 +127,33 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         		
         		
         	}
+        	
+        	
+        	rs = st.executeQuery(sql);
+			
+			int WooActivo = 0;
+			
+			Usuario u = null;
+			
+			while (rs.next()){
+				u = new Usuario();
+				
+				u.setId(rs.getInt(1));
+				u.setNombreBD(rs.getString(2));
+				u.setUsrBD(rs.getString(3));
+				u.setPassBD(rs.getString(4));
+				//u.setNombre(name);
+				//u.setNick(usuario);
+    		
+			}
+    		
+        	Connection conexionUsr = MariaDBSadpyme.GetConnection("app.xconecta.com", u.getUsrBD(), u.getPassBD(), u.getNombreBD());
+        	Statement stUsr = conexionUsr.createStatement();
+        	
+        	
+        	
+        	
+        	
         	/*
         	idUsuario = "1";
         	status = "-1";
@@ -130,14 +179,18 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         		}
         		
         	
-        		sql = "select f.id,f.serie,f.folio,f.xml,'',f.status,f.uuid,f.registro "
-        				+ " from facturas f, metodos_pago mp "
-        				+ " where f.metodo_pago=mp.id and ifnull(f.receptor,0)=0 and f.usuario=" + idUsuario 
-        				+ " and date(f.registro) between STR_TO_DATE('" + fecha1 + "','%d/%m/%Y')"
+        		sql = "select f.id,f.serie,f.folio,f.xml,'',f.status,f.uuid"
+        				+ ",f.fecha "
+        				+ " from pv_facturas_finkok f"
+        				+ " where " 
+        				//+ " f.metodo_pago=mp.id and "
+        				//+ " ifnull(f.receptor,0)=0 and "
+        				//+ " f.usuario=" + idUsuario 
+        				+ " date(f.fecha) between STR_TO_DATE('" + fecha1 + "','%d/%m/%Y')"
         				+ " and STR_TO_DATE('" + fecha2 + "','%d/%m/%Y')"
         				+ filtroStatus
         				+ filtroUuid
-        				+ filtroMetodoPago
+        				//+ filtroMetodoPago
         				
         				//+ " and f.id=2158"
         				
@@ -145,25 +198,28 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         		
         		System.out.println(sql);
         		
-        		rs = st.executeQuery(sql);
+        		//rs = st.executeQuery(sql);
         		
-        		
-        		
-        		while (rs.next()) {
+            	
+            	ResultSet rsUsr = stUsr.executeQuery(sql);
+            	
+        		while (rsUsr.next()) {
         			
-        			if (rs.getString(4).length()>100){
+        			if (rsUsr.getString(4).length()>100){
         				
         				Comprobante f = new mx.gob.sat.cfd._3.Comprobante();
+        				File file = new File(IP.getDir() + "factura" + rsUsr.getString(1) + ".xml");
         				
+        				/*
         				DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         				InputSource is = new InputSource();
-        				is.setCharacterStream(new StringReader(rs.getString(4)));
+        				is.setCharacterStream(new StringReader(rsUsr.getString(4)));
         				is.setEncoding("utf-8");
         				
         				
         				org.w3c.dom.Document doc = db.parse(is);
         				
-        				File file = new File(IP.getDir() + "factura" + rs.getString(1) + ".xml");
+        				File file = new File(IP.getDir() + "factura" + rsUsr.getString(1) + ".xml");
         				//File file = new File("C:\\idalytec.com\\cfdiapp\\factura" + rs.getString(1) + ".xml");
         				
         				System.out.println(file.getAbsolutePath());
@@ -178,6 +234,32 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         				
         				
         				f = CFDv33.newComprobante(new FileInputStream(file));
+        				*/
+        				
+        				
+        				DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            			InputSource is = new InputSource();
+            			is.setCharacterStream(new StringReader(rsUsr.getString(4)));
+            			
+            			//System.out.println(xmlRecords);
+            			
+            			org.w3c.dom.Document doc = db.parse(is);
+            			
+            			
+            			Source origen = new DOMSource(doc);
+            			//File file = new File(xmlFileName);
+            			Result resultado = new StreamResult(file);
+            			Result consola= new StreamResult(System.out);
+            			Transformer transformar = TransformerFactory.newInstance().newTransformer();
+            			transformar.transform(origen, resultado);
+            			transformar.transform(origen, consola);
+            			
+            			System.out.println("entro a generar cfdi");
+            			
+            			
+            			
+            			f = CFDv33.newComprobante(new FileInputStream(file));
+        				
         				
         				
         				//file.delete();
@@ -206,9 +288,9 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         				if (agrega&&version.equals("3.3")){
         					
         					JSONObject jsonObject = new JSONObject();
-        					jsonObject.put("id_factura", rs.getInt(1));
-        					jsonObject.put("serie", rs.getString(2));
-        					jsonObject.put("folio", rs.getString(3));
+        					jsonObject.put("id_factura", rsUsr.getInt(1));
+        					jsonObject.put("serie", rsUsr.getString(2));
+        					jsonObject.put("folio", rsUsr.getString(3));
         					
         					jsonObject.put("folio_comprobante", f.getFolio());
         					jsonObject.put("serie_comprobante", f.getSerie());
@@ -218,8 +300,8 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         					jsonObject.put("nombre_receptor", f.getReceptor().getNombre());
         					
         					jsonObject.put("fecha", f.getFecha());
-        					jsonObject.put("correo_receptor", rs.getString(5));
-        					jsonObject.put("status", rs.getString(6));
+        					jsonObject.put("correo_receptor", rsUsr.getString(5));
+        					jsonObject.put("status", rsUsr.getString(6));
         					
         					jsonObject.put("tipo_comprobante",  f.getTipoDeComprobante().value() );
         					
@@ -271,7 +353,7 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         					        				
         				} else {
         					
-        					mx.bigdata.sat.cfdi.v32.schema.Comprobante	f22 = CFDv32.newComprobante(new FileInputStream(file));
+        					/*mx.bigdata.sat.cfdi.v32.schema.Comprobante	f22 = CFDv32.newComprobante(new FileInputStream(file));
         					
         					
         					System.out.println("22" + f22.getFolio());
@@ -307,8 +389,10 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         						jsonObject.put("uuid", "");
         					}
         					
-        					jsonArray.add(jsonObject);
         					
+        					
+        					jsonArray.add(jsonObject);
+        					*/
         					
         				}
         				
@@ -316,9 +400,9 @@ public class ConsultaComprobantesServlet extends HttpServlet {
         				
         			} else {
         				JSONObject jsonObject = new JSONObject();
-    					jsonObject.put("id_factura", rs.getInt(1));
-    					jsonObject.put("serie", rs.getString(2));
-    					jsonObject.put("folio", rs.getString(3));
+    					jsonObject.put("id_factura", rsUsr.getInt(1));
+    					jsonObject.put("serie", rsUsr.getString(2));
+    					jsonObject.put("folio", rsUsr.getString(3));
     					
     					jsonObject.put("folio_comprobante", "");
     					jsonObject.put("serie_comprobante", "");
@@ -327,12 +411,12 @@ public class ConsultaComprobantesServlet extends HttpServlet {
     					jsonObject.put("rfc_receptor", "");
     					jsonObject.put("nombre_receptor", "");
     					
-    					jsonObject.put("fecha", sdf.format(rs.getDate(8)));
-    					jsonObject.put("correo_receptor", rs.getString(5));
-    					jsonObject.put("status", rs.getString(6));
+    					jsonObject.put("fecha", sdf.format(rsUsr.getDate(8)));
+    					jsonObject.put("correo_receptor", rsUsr.getString(5));
+    					jsonObject.put("status", rsUsr.getString(6));
     				
     					
-    					jsonObject.put("uuid", rs.getString(7));
+    					jsonObject.put("uuid", rsUsr.getString(7));
     					
     					jsonArray.add(jsonObject);
         				

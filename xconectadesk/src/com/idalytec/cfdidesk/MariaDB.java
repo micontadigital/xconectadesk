@@ -18,11 +18,11 @@ public class MariaDB {
     		
     		String host = "localhost";
     		
-    		host = "idalytec.com";
+    		host = "app.xconecta.com";
     		
-    		System.out.println("jdbc:mariadb://" + host + ":3306/cfdiapp");
+    		System.out.println("jdbc:mariadb://" + host + ":3306/usuarios_sadpyme");
     		
-        	conexion = DriverManager.getConnection("jdbc:mariadb://" + host + ":3306/cfdiapp", "cfdiappuser", "Acceso01.");
+        	conexion = DriverManager.getConnection("jdbc:mariadb://" + host + ":3306/usuarios_sadpyme", "micontadigital", "Acceso2014.");
         	//conexion = DriverManager.getConnection("jdbc:mariadb://idalytec.com:3306/cfdiapp", "cfdiappuser", "Acceso01.");
         }
         catch(SQLException ex)

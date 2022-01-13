@@ -32,7 +32,7 @@ import org.json.simple.JSONObject;
 import com.finkok.facturacion.stamp.Application;
 import com.finkok.facturacion.stamp.StampSOAPLocator;
 
-import mx.bigdata.sat.cfdi.CFDv32;
+//import mx.bigdata.sat.cfdi.CFDv32;
 import mx.gob.sat.cfd._3.CFDv33;
 import mx.gob.sat.cfd._3.Comprobante;
 import mx.gob.sat.cfd._3.Comprobante.Complemento;
@@ -308,7 +308,7 @@ public class UploadFacturaPagoSadpymeServlet extends HttpServlet {
 							//generada = true;
 	
 							if (generada){
-	
+	/*
 	
 								mx.bigdata.sat.cfdi.v32.schema.Comprobante f = CFDv32.newComprobante(new FileInputStream(file));
 				            	
@@ -405,7 +405,7 @@ public class UploadFacturaPagoSadpymeServlet extends HttpServlet {
 				            		
 				            		
 				            	}
-								
+								*/
 							
 							}
 		

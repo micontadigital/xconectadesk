@@ -28,7 +28,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.xml.sax.InputSource;
 
-import mx.bigdata.sat.cfdi.CFDv32;
+//import mx.bigdata.sat.cfdi.CFDv32;
 import mx.gob.sat.cfd._3.CFDv33;
 import mx.gob.sat.cfd._3.Comprobante;
 
@@ -221,7 +221,7 @@ public class ConsultaComprobanteByIdServlet extends HttpServlet {
         					
         					        				
         				} else {
-        					
+        					/*
         					mx.bigdata.sat.cfdi.v32.schema.Comprobante	f22 = CFDv32.newComprobante(new FileInputStream(file));
         					
         					
@@ -260,7 +260,7 @@ public class ConsultaComprobanteByIdServlet extends HttpServlet {
         					
         					jsonArray.add(jsonObject);
         					
-        					
+        					*/
         				}
         				
         				file.delete();

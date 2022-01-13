@@ -238,10 +238,12 @@ public class CancelarComprobanteServlet2 extends HttpServlet {
 															
         									dml_stmt.executeUpdate();
         									
+        									
+        									/*
         									com.idalytec.sadpyme.facturacion.CorreoFormato.enviarCancelacion(
         											correoReceptor, serie + folio, uuid, rfc, razon);
 
-        									
+        									*/
         									
         									cancelada = true;			
         									mensaje = "La factura se canceló correctamente.";
@@ -280,10 +282,11 @@ public class CancelarComprobanteServlet2 extends HttpServlet {
 															
         									dml_stmt.executeUpdate();
         									
+        									/*
         									com.idalytec.sadpyme.facturacion.CorreoFormato.enviarCancelacion(
         											correoReceptor, serie + folio, uuid, rfc, razon);
 
-        									
+        									*/
         									cancelada = true;
         									mensaje = "La factura se canceló correctamente.";
 														
