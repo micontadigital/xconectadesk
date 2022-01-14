@@ -17,6 +17,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -249,17 +251,22 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 							SIFEI sifei = locator.getSIFEIPort();
 							
 							boolean correcto = false;
-							
+							mx.gob.sat.cfd._3.Comprobante f33 = null;
+				            List<mx.gob.sat.cfd._3.Comprobante.Complemento> complemento33;
+				            mx.gob.sat.timbrefiscaldigital.TimbreFiscalDigital t33 = null;
+				            File newFile = null;
 							try {
-								/*
+								
+								///desarrollo
 								byte[] archivoRespuesta = sifei.getCFDISign("GAME791105P87"
 											, "8534bc8b", bytesArray, "", "NGM5ODAxZWMtYmFhMy0wNWJkLTUxMjUtNWQyZTNjOTUzNjI5");
 											
-								*/
 								
+								
+								/*///produccion
 								byte[] archivoRespuesta = sifei.getCFDISign("GAME791105P87", "Js5&Jk7&" 
 										, bytesArray, "", "YzY1ZjVmYTMtYjdiMS1kNjczLTI3NmItNWQ1MmZmOWZjMDc4");
-								
+								*/
 								
 								correcto = true;
 								
@@ -275,7 +282,7 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 					            ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZipPath));
 					            ZipEntry zipEntry = zis.getNextEntry();
 					            
-					            File newFile = null;
+					            
 					            while (zipEntry != null) {
 					            	newFile = new File (IP.getDir() + zipEntry.getName());
 					                FileOutputStream fos1 = new FileOutputStream(newFile);
@@ -291,8 +298,7 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 					            
 					            String UUIDResp = "";
 					            
-					            mx.gob.sat.cfd._3.Comprobante f33;
-					            List<mx.gob.sat.cfd._3.Comprobante.Complemento> complemento33;
+					            
 					            
 					            f33 = CFDv33.newComprobante(new FileInputStream(newFile.getAbsolutePath()));
 								
@@ -300,7 +306,7 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 
 								mx.gob.sat.cfd._3.Comprobante.Complemento comp =  complemento33.get(0);
 
-								mx.gob.sat.timbrefiscaldigital.TimbreFiscalDigital t33 = null;
+								
 									
 								List<Object> timbre =  comp.getAny();
 								
@@ -371,7 +377,7 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 	
 							}
 							*/
-								
+							/*
 							sql = "select ifnull(max(id),0) + 1 from facturas";
 							st = conexion.createStatement();
 							
@@ -404,24 +410,127 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 							dml_stmt.setInt(13, idFacturaCfdiApp);
 	
 							dml_stmt.executeUpdate();
+							*/
+								
 							
-							resultado = "La factura se generó correctamente.";
+								
 							
 							
+							Connection conn = MariaDB.getConexion();
+						
+								
+								st = conn.createStatement();
+								
+								sql = ("select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local, id_sucursal, id_terminal"
+										+ ", id_usuario_local, tipo, woo_activo from usuarios "
+										+ "where usuario='" + correo + "' and pass='" + pass + "'" );
+					        	
+					    		System.out.println(sql);
+					        	rs = st.executeQuery(sql);
+					        	
+					        	while (rs.next()) {
+					        		idUsuario = rs.getInt(1);
+					        		
+					        		
+					        		
+					        	}
+					        	            	
+					        	rs = st.executeQuery(sql);
+								
+								int WooActivo = 0;
+								
+								Usuario u  = null;
+								
+								while (rs.next()){
+									u = new Usuario();
+									
+									u.setId(rs.getInt(1));
+									u.setNombreBD(rs.getString(2));
+									u.setUsrBD(rs.getString(3));
+									u.setPassBD(rs.getString(4));
+									//u.setNombre(name);
+									//u.setNick(usuario);
+					    		
+								}
+								
+								Connection conexionUsr = null;
+					    		
+					        	conexionUsr = MariaDBSadpyme.GetConnection("app.xconecta.com", u.getUsrBD(), u.getPassBD(), u.getNombreBD());
+					        	Statement stUsr = conexionUsr.createStatement();
+							
+								
+								sql = "select ifnull(max(id),0) + 1 from pv_facturas_finkok";
+								
+								rs = stUsr.executeQuery(sql);
+								
+								int idFacturaFinkok = 0;	
+								while (rs.next()) {
+									idFacturaFinkok = rs.getInt(1);
+									
+								}
+				
+			
+								sql = "insert into pv_facturas_finkok (uuid, xml, cliente, status, serie, folio, cod_status, incidencia, total, id, iva) "
+										+ " values (?,?,?,?,?, ?,?,?,?,?, ?)";
+			
+								dml_stmt = conexionUsr.prepareStatement(sql);
+								
+								dml_stmt.setString(1, ( (t33!=null)?t33.getUUID():"") );
+								dml_stmt.setString(2, readFile(newFile.getAbsolutePath()));
+								dml_stmt.setInt(3, 1);
+								dml_stmt.setInt(4, 1);
+								dml_stmt.setString(5, f33.getSerie());
+								dml_stmt.setString(6, f33.getFolio());
+								dml_stmt.setString(7, "");
+								dml_stmt.setString(8, "");
+								dml_stmt.setDouble(9, f33.getTotal().doubleValue());
+								dml_stmt.setInt(10, idFacturaFinkok);
+								dml_stmt.setDouble(11, 0);
+								
+								dml_stmt.executeUpdate();
+								
+								String listaVentas = "";
+								
+								/*
+								for(int k = 0 ; k < ventas.size() ; k++) {
+									listaVentas += ventas.get(k) + ",";
+								}
+								
+								if (ventas.size()>0) {
+									sql = "update pv_ventas set factura=? where id in (" + listaVentas.substring(0,listaVentas.length()-1) + ")";
+											
+									dml_stmt = conexion.prepareStatement(sql);
+									
+									dml_stmt.setInt(1, idFacturaFinkok);
+									
+									dml_stmt.executeUpdate();
+									
+								}
+								*/
+								
+								
+								resultado = "La factura se generó correctamente.";
+								
 							} catch (SifeiException e) {
 								System.out.println(e.getCodigo());
 								System.out.println(e.getMessage1());
 								System.out.println(e.getError());
-								
-								//incidencia = e.getCodigo() + " - " + e.getMessage1();
+								generada = false;
+								resultado = e.getCodigo() + " - " + e.getMessage1() + "\n" + e.getError();
 								
 							} catch (Exception e) {
 								System.out.println(e.getMessage());
 								
-								
-								//incidencia = e.getMessage();
+								generada = false;
+								resultado = e.getMessage();
 								
 							}
+								
+							
+							
+							
+							
+							
 							
 	
 							//file.delete();
@@ -448,7 +557,7 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 				
 				if (generada) {
 					
-					guardaFactura(idFacturaCfdiApp, obtenerIdMP(idUsuario));
+					//guardaFactura(idFacturaCfdiApp, obtenerIdMP(idUsuario));
 					
 				}
 				
@@ -562,65 +671,91 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 	
 	
 	public int obtenerDisponibles(String correo, String pass, int valor) {
-		Connection conn = MariaDBSadpyme.GetConnection("localhost","usrusuarios","AccesoUsuarios01","usuarios_sadpyme");
+		
+		
 		Statement st = null;
 		ResultSet rs = null;
 		ResultSet rs1 = null;
 		String sql = "";
 		int disponibles = 0;
 		int idUsuario = 0;
+		Connection conn = MariaDB.getConexion();
 		try{
 			
 			st = conn.createStatement();
 			
-			sql = "select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local from usuarios where usuario='" + correo + "' and pass='" + pass + "'" ;
+			sql = ("select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local, id_sucursal, id_terminal"
+					+ ", id_usuario_local, tipo, woo_activo from usuarios "
+					+ "where usuario='" + correo + "' and pass='" + pass + "'" );
+        	
+    		System.out.println(sql);
+        	rs = st.executeQuery(sql);
+        	
+        	while (rs.next()) {
+        		idUsuario = rs.getInt(1);
+        		
+        		
+        		
+        	}
+        	            	
+        	rs = st.executeQuery(sql);
 			
-			System.out.println(sql);
+			int WooActivo = 0;
 			
-			rs = st.executeQuery(sql);
-			
-			
+			Usuario u  = null;
 			
 			while (rs.next()){
+				u = new Usuario();
 				
-				idUsuario = rs.getInt(1);
-				
+				u.setId(rs.getInt(1));
+				u.setNombreBD(rs.getString(2));
+				u.setUsrBD(rs.getString(3));
+				u.setPassBD(rs.getString(4));
+				//u.setNombre(name);
+				//u.setNick(usuario);
+    		
 			}
 			
-			sql = "select id, description, referencia, vigencia from mp where status='approved'"
-					+ " and usuario=" + idUsuario + " and vigencia>=now() order by vigencia,id" ;
-					
-			System.out.println(sql);
+			Connection conexionUsr = null;
+    		
+        	conexionUsr = MariaDBSadpyme.GetConnection("app.xconecta.com", u.getUsrBD(), u.getPassBD(), u.getNombreBD());
+        	Statement stUsr = conexionUsr.createStatement();
+			
+			int cantidad=0;
+			int facturas=0;
+			
+        	Date fecha = new Date();
+			sql = "select cantidad, fecha from conekta_ordenes where concepto='FACTURAS'"
+					+ " and usuario=" + u.getId()
+					+ " and status in ('paid','active') and ADDDATE(fecha, INTERVAL 1 MONTH)>=now()";
 			
 			st = conn.createStatement();
+			System.out.println(sql);
 			rs = st.executeQuery(sql);
-			
-			
-			
-			while (rs.next()){
-				int idServicio = rs.getInt(1);
-				String referencia =  rs.getString(3);
-				int cant = 0;
-				if (referencia.indexOf("FAC")!=-1) {
-					cant = Integer.parseInt(referencia.replace("FAC", ""));
-					
+			int x = 0;
+			while (rs.next()) {
+				cantidad += rs.getInt(1);
+				if (x==0) {
+					fecha = rs.getDate(2);
 				}
-				
-				sql = "select count(id) from mp where id_mp=" + idServicio;
-				
-				System.out.println(sql);
-				
-				rs1 = st.executeQuery(sql);
-				int facturas = 0;
-				while (rs1.next()) {
-					facturas = rs1.getInt(1);
-				}
-				
-				disponibles += (cant - facturas);
-				
-				System.out.println("disponibles " + cant + " " + facturas);
-				
 			}
+			
+				
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+			sql = "select count(id) from pv_facturas_finkok where fecha>STR_TO_DATE('" + sdf.format(fecha) + "','DD-MM-YYYY')";
+			st = conexionUsr.createStatement();
+			System.out.println(sql);
+			rs = stUsr.executeQuery(sql);
+			while (rs.next()) {
+				facturas = rs.getInt(1);
+			}
+				
+				disponibles = (cantidad - facturas);
+				
+				System.out.println("disponibles " + cantidad + " " + facturas);
+				
+			
 			
 			
 			

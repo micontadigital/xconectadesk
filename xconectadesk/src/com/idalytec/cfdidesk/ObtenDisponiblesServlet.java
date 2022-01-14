@@ -55,7 +55,7 @@ public class ObtenDisponiblesServlet extends HttpServlet {
 		try {
 			st = conexion.createStatement();
 			
-			sql = "select id from usuarios where correo='" + correo + "' and password='" + pass + "'" ;
+			sql = "select id from usuarios where usuario='" + correo + "' and pass='" + pass + "'" ;
         	
         	rs = st.executeQuery(sql);
         	

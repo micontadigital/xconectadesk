@@ -10,24 +10,28 @@ package org.datacontract.schemas._2004._07.Sat_Cfdi_Negocio_ConsultaCfdi_Servici
 public class Acuse  implements java.io.Serializable {
     private java.lang.String codigoEstatus;
 
-    private java.lang.String estado;
-    
     private java.lang.String esCancelable;
-    
+
+    private java.lang.String estado;
+
     private java.lang.String estatusCancelacion;
+
+    private java.lang.String validacionEFOS;
 
     public Acuse() {
     }
 
     public Acuse(
            java.lang.String codigoEstatus,
-           java.lang.String estado
-           ,java.lang.String esCancelable
-           ,java.lang.String estatusCancelacion) {
+           java.lang.String esCancelable,
+           java.lang.String estado,
+           java.lang.String estatusCancelacion,
+           java.lang.String validacionEFOS) {
            this.codigoEstatus = codigoEstatus;
-           this.estado = estado;
            this.esCancelable = esCancelable;
+           this.estado = estado;
            this.estatusCancelacion = estatusCancelacion;
+           this.validacionEFOS = validacionEFOS;
     }
 
 
@@ -52,6 +56,26 @@ public class Acuse  implements java.io.Serializable {
 
 
     /**
+     * Gets the esCancelable value for this Acuse.
+     * 
+     * @return esCancelable
+     */
+    public java.lang.String getEsCancelable() {
+        return esCancelable;
+    }
+
+
+    /**
+     * Sets the esCancelable value for this Acuse.
+     * 
+     * @param esCancelable
+     */
+    public void setEsCancelable(java.lang.String esCancelable) {
+        this.esCancelable = esCancelable;
+    }
+
+
+    /**
      * Gets the estado value for this Acuse.
      * 
      * @return estado
@@ -70,23 +94,47 @@ public class Acuse  implements java.io.Serializable {
         this.estado = estado;
     }
 
-    public java.lang.String getEsCancelable() {
-		return esCancelable;
-	}
 
-	public void setEsCancelable(java.lang.String esCancelable) {
-		this.esCancelable = esCancelable;
-	}
+    /**
+     * Gets the estatusCancelacion value for this Acuse.
+     * 
+     * @return estatusCancelacion
+     */
+    public java.lang.String getEstatusCancelacion() {
+        return estatusCancelacion;
+    }
 
-	public java.lang.String getEstatusCancelacion() {
-		return estatusCancelacion;
-	}
 
-	public void setEstatusCancelacion(java.lang.String estatusCancelacion) {
-		this.estatusCancelacion = estatusCancelacion;
-	}
+    /**
+     * Sets the estatusCancelacion value for this Acuse.
+     * 
+     * @param estatusCancelacion
+     */
+    public void setEstatusCancelacion(java.lang.String estatusCancelacion) {
+        this.estatusCancelacion = estatusCancelacion;
+    }
 
-	private java.lang.Object __equalsCalc = null;
+
+    /**
+     * Gets the validacionEFOS value for this Acuse.
+     * 
+     * @return validacionEFOS
+     */
+    public java.lang.String getValidacionEFOS() {
+        return validacionEFOS;
+    }
+
+
+    /**
+     * Sets the validacionEFOS value for this Acuse.
+     * 
+     * @param validacionEFOS
+     */
+    public void setValidacionEFOS(java.lang.String validacionEFOS) {
+        this.validacionEFOS = validacionEFOS;
+    }
+
+    private java.lang.Object __equalsCalc = null;
     public synchronized boolean equals(java.lang.Object obj) {
         if (!(obj instanceof Acuse)) return false;
         Acuse other = (Acuse) obj;
@@ -101,17 +149,18 @@ public class Acuse  implements java.io.Serializable {
             ((this.codigoEstatus==null && other.getCodigoEstatus()==null) || 
              (this.codigoEstatus!=null &&
               this.codigoEstatus.equals(other.getCodigoEstatus()))) &&
+            ((this.esCancelable==null && other.getEsCancelable()==null) || 
+             (this.esCancelable!=null &&
+              this.esCancelable.equals(other.getEsCancelable()))) &&
             ((this.estado==null && other.getEstado()==null) || 
              (this.estado!=null &&
               this.estado.equals(other.getEstado()))) &&
-            ((this.esCancelable==null && other.getEsCancelable()==null) || 
-                    (this.esCancelable!=null &&
-                     this.esCancelable.equals(other.getEsCancelable())))
-            &&
             ((this.estatusCancelacion==null && other.getEstatusCancelacion()==null) || 
-                    (this.estatusCancelacion!=null &&
-                     this.estatusCancelacion.equals(other.getEstatusCancelacion())))
-            ;
+             (this.estatusCancelacion!=null &&
+              this.estatusCancelacion.equals(other.getEstatusCancelacion()))) &&
+            ((this.validacionEFOS==null && other.getValidacionEFOS()==null) || 
+             (this.validacionEFOS!=null &&
+              this.validacionEFOS.equals(other.getValidacionEFOS())));
         __equalsCalc = null;
         return _equals;
     }
@@ -126,14 +175,17 @@ public class Acuse  implements java.io.Serializable {
         if (getCodigoEstatus() != null) {
             _hashCode += getCodigoEstatus().hashCode();
         }
-        if (getEstado() != null) {
-            _hashCode += getEstado().hashCode();
-        }
         if (getEsCancelable() != null) {
             _hashCode += getEsCancelable().hashCode();
         }
+        if (getEstado() != null) {
+            _hashCode += getEstado().hashCode();
+        }
         if (getEstatusCancelacion() != null) {
             _hashCode += getEstatusCancelacion().hashCode();
+        }
+        if (getValidacionEFOS() != null) {
+            _hashCode += getValidacionEFOS().hashCode();
         }
         __hashCodeCalc = false;
         return _hashCode;
@@ -153,14 +205,6 @@ public class Acuse  implements java.io.Serializable {
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("estado");
-        elemField.setXmlName(new javax.xml.namespace.QName("http://schemas.datacontract.org/2004/07/Sat.Cfdi.Negocio.ConsultaCfdi.Servicio", "Estado"));
-        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
-        elemField.setMinOccurs(0);
-        elemField.setNillable(true);
-        typeDesc.addFieldDesc(elemField);
-        
-        elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("esCancelable");
         elemField.setXmlName(new javax.xml.namespace.QName("http://schemas.datacontract.org/2004/07/Sat.Cfdi.Negocio.ConsultaCfdi.Servicio", "EsCancelable"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
@@ -168,8 +212,22 @@ public class Acuse  implements java.io.Serializable {
         elemField.setNillable(true);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("estado");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://schemas.datacontract.org/2004/07/Sat.Cfdi.Negocio.ConsultaCfdi.Servicio", "Estado"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
         elemField.setFieldName("estatusCancelacion");
         elemField.setXmlName(new javax.xml.namespace.QName("http://schemas.datacontract.org/2004/07/Sat.Cfdi.Negocio.ConsultaCfdi.Servicio", "EstatusCancelacion"));
+        elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
+        elemField.setMinOccurs(0);
+        elemField.setNillable(true);
+        typeDesc.addFieldDesc(elemField);
+        elemField = new org.apache.axis.description.ElementDesc();
+        elemField.setFieldName("validacionEFOS");
+        elemField.setXmlName(new javax.xml.namespace.QName("http://schemas.datacontract.org/2004/07/Sat.Cfdi.Negocio.ConsultaCfdi.Servicio", "ValidacionEFOS"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "string"));
         elemField.setMinOccurs(0);
         elemField.setNillable(true);

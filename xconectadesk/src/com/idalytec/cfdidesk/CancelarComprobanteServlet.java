@@ -29,9 +29,15 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.rpc.ServiceException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
@@ -141,11 +147,15 @@ public class CancelarComprobanteServlet extends HttpServlet {
 		
 		System.out.println("Servlet Upload " + correoReceptor);
 		
+		
+		int idComprobante = 0;
+		 Connection conexionUsr = null;
+		
 		try {
 			
 			st = conexion.createStatement();
 			
-			sql = "select id, ph from usuarios where correo='" + correo + "' and password='" + pass + "'" ;
+			sql = "select id from usuarios where usuario='" + correo + "' and pass='" + pass + "'" ;
         	
 			System.out.println(sql);
 			
@@ -154,7 +164,7 @@ public class CancelarComprobanteServlet extends HttpServlet {
         	
         	while (rs.next()) {
         		idUsuario = rs.getString(1);
-        		ph = rs.getString(2);
+        		//ph = rs.getString(2);
         	}
         	
         	
@@ -162,40 +172,98 @@ public class CancelarComprobanteServlet extends HttpServlet {
 			/*
         		CancelSOAPLocator cancelSOAP = new CancelSOAPLocator();
     			Application application = cancelSOAP.getApplication();
+    			
+    			
 */
+        		
+        		
+        		sql = ("select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local, id_sucursal, id_terminal"
+    					+ ", id_usuario_local, tipo, woo_activo from usuarios "
+    					+ "where usuario='" + correo + "' and pass='" + pass + "'" );
+            	
+        		System.out.println(sql);
+            	rs = st.executeQuery(sql);
+            	
+            	while (rs.next()) {
+            		idUsuario = rs.getString(1);
+            		
+            		
+            		
+            	}
+            	            	
+            	rs = st.executeQuery(sql);
+    			
+    			int WooActivo = 0;
+    			
+    			Usuario u  = null;
+    			
+    			while (rs.next()){
+    				u = new Usuario();
+    				
+    				u.setId(rs.getInt(1));
+    				u.setNombreBD(rs.getString(2));
+    				u.setUsrBD(rs.getString(3));
+    				u.setPassBD(rs.getString(4));
+    				//u.setNombre(name);
+    				//u.setNick(usuario);
+        		
+    			}
+        		
+            	conexionUsr = MariaDBSadpyme.GetConnection("app.xconecta.com", u.getUsrBD(), u.getPassBD(), u.getNombreBD());
+            	Statement stUsr = conexionUsr.createStatement();
     			
         		UUIDS uuids = new UUIDS(new String[] {uuid});
         		
         		
-        		String idComprobante = "";
-        		String serie = "";
-        		String folio = "";
-        		String rfc = "";
-        		String razon = "";
+        		String xmlRecords = "";
+        		String observaciones = "";
+        		
+        		String destino = "";
+        		
+        		String xmlFileName = IP.getDir() + "factura" + uuid + ".xml";
+        		
+        		sql = "select f.xml, f.cod_status, f.uuid, c.email from pv_facturas_finkok f"
+        				+ ", pv_clientes c where f.cliente=c.id and f.uuid='" +  uuid + "'";
+        		rs = stUsr.executeQuery(sql);
         		
         		
-        		
-        		
-        		sql = "select f.id, f.serie, f.folio, u.rfc, u.razon_social, f.xml from facturas f, usuarios u "
-        				+ " where f.usuario=u.id and uuid = '" + uuid + "'";
-        		
-        		String xml = "";
-        		rs = st.executeQuery(sql);
-        		while (rs.next()){
-        			idComprobante = rs.getString(1);
-        			serie = rs.getString(2);
-        			folio = rs.getString(3);
-        			rfc = rs.getString(4);
-        			razon = rs.getString(5); 
-        			xml = rs.getString(6);
-        			
-        			System.out.println(rfc);
+        		while (rs.next()) {
+        			xmlRecords = rs.getString(1);
+        			observaciones = rs.getString(2);
+        			uuid = rs.getString(3);
+        			destino = rs.getString(4);
         		}
         		
-        		//rfc="AAA010101AAA";
         		
-        		//Openssl.datos(rfc, "", conexion);
+        		Comprobante comprobante = null;
+        		Emisor emisor = new Emisor();
+    			Receptor receptor = new Receptor();
         		
+        		
+            	DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    			InputSource is = new InputSource();
+    			is.setCharacterStream(new StringReader(xmlRecords));
+    			
+    			System.out.println(xmlRecords);
+    			
+    			org.w3c.dom.Document doc = db.parse(is);
+    			
+    			
+    			Source origen = new DOMSource(doc);
+    			File file = new File(xmlFileName);
+    			Result resultado = new StreamResult(file);
+    			Result consola= new StreamResult(System.out);
+    			Transformer transformar = TransformerFactory.newInstance().newTransformer();
+    			transformar.transform(origen, resultado);
+    			transformar.transform(origen, consola);
+    			
+    			System.out.println("entro a generar cfdi");
+    			
+    			
+    			
+    			Comprobante f = CFDv33.newComprobante(new FileInputStream(file));
+        		
+    			String rfc = f.getReceptor().getRfc();
         		
         		String pathCer = IP.getDir() + "pfx" + rfc + ".pfx";
         		String pathKey = IP.getDir() + "key" + rfc + ".pem";
@@ -227,36 +295,17 @@ public class CancelarComprobanteServlet extends HttpServlet {
         		byte[] cer = leeArchivo(pathCer).getBytes("UTF-8");
         		byte[] key = leeArchivo(pathKey).getBytes("UTF-8");
         		
-	        	
-	
-	        	Comprobante f = new mx.gob.sat.cfd._3.Comprobante();
+	                
 				
 				DocumentBuilder db1 = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 				InputSource is1 = new InputSource();
-				is1.setCharacterStream(new StringReader(xml));
+				is1.setCharacterStream(new StringReader(xmlRecords));
 				is1.setEncoding("utf-8");
 				
 				
 				org.w3c.dom.Document doc1 = db1.parse(is1);
 				
-				File file = new File(IP.getDir() + "factura" + rfc + ".xml");
-				//File file = new File("C:\\idalytec.com\\cfdiapp\\factura" + rs.getString(1) + ".xml");
-				
-				System.out.println(file.getAbsolutePath());
-				
-				javax.xml.transform.Source origen = new javax.xml.transform.dom.DOMSource(doc1);
-		//		File file = new File(xmlFileName);
-				javax.xml.transform.Result resultado = new javax.xml.transform.stream.StreamResult(file);
-				javax.xml.transform.Result consola = new javax.xml.transform.stream.StreamResult(System.out);
-				javax.xml.transform.Transformer transformar = javax.xml.transform.TransformerFactory.newInstance().newTransformer();
-				transformar.transform(origen, resultado);
-				transformar.transform(origen, consola);
-				
-				
-				f = CFDv33.newComprobante(new FileInputStream(file));
-				
-				
-				
+			
 				
 				//Openssl.creaPFX(rfc, ph);
 					
@@ -292,7 +341,7 @@ public class CancelarComprobanteServlet extends HttpServlet {
         			System.out.println(rfcUsuario);
         		}
         		*/
-				String[] uuidss = new String[]{uuid}; 
+				String[] uuidss = new String[]{"|" + uuid + "|02||"}; 
 				
 				System.out.println(rfc);
 				System.out.println(uuidss[0]);
@@ -306,16 +355,27 @@ public class CancelarComprobanteServlet extends HttpServlet {
         			
 					Cancelacion_ServiceLocator locator = new Cancelacion_ServiceLocator();
 					Cancelacion_PortType app = locator.getCancelacionPort();
+					/*
+					
 					resp = app.cancelaCFDI("GAME791105P87", "Js5&Jk7&", rfc
 							, bytesArray, passpfx, uuidss);
+					*/
+
 					
-					DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-	    			InputSource is = new InputSource();
+					// desarrollo
+					resp = app.cancelaCFDI("GAME791105P87", "8534bc8b"
+							, rfc, bytesArray, Openssl.getPass(), uuidss);
+					
+					
+					
+					
+					db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+	    			is = new InputSource();
 	    			is.setCharacterStream(new StringReader(resp));
 	    			
 	    			System.out.println(resp);
 	    			
-	    			org.w3c.dom.Document doc = db.parse(is);
+	    			doc = db.parse(is);
 	    			
 	    			doc.getDocumentElement().normalize();
 	    			
@@ -377,7 +437,7 @@ public class CancelarComprobanteServlet extends HttpServlet {
         			
         			DecimalFormat df = new DecimalFormat("0000000000.000000");
         			
-        			String re = rfc;
+        			String re = f.getEmisor().getRfc();
         			String rr = f.getReceptor().getRfc();
         			String tt = df.format(f.getTotal());
         			String id = uuid;
@@ -387,7 +447,7 @@ public class CancelarComprobanteServlet extends HttpServlet {
         			
         			System.out.println(parametro);
         			
-        			conexion = MariaDB.getConexion();
+        			//conexion = MariaDB.getConexion();
         			
         			
         			try {
@@ -402,12 +462,23 @@ public class CancelarComprobanteServlet extends HttpServlet {
 	     	            
 						if (acuse.getEstado().equals("Cancelado")){
 							
-							sql = "UPDATE facturas set status=9 where id=" + idComprobante;
-							dml_stmt = conexion.prepareStatement(sql);
+							
+							sql = "UPDATE pv_facturas_finkok set status=?, cancelacion=? where id=" + idComprobante;
+							dml_stmt = conexionUsr.prepareStatement(sql);
+							dml_stmt.setInt(1, 9);
+							dml_stmt.setString(2, resp);
 							dml_stmt.executeUpdate();
+							String serie = "";
+			        		String folio = "";
+			        		//String rfc = "";
+			        		String razon = "";
+							
+							
+							Correo.enviarCancelacion(
+								destino, serie + folio, uuid, f.getEmisor().getRfc(), razon);
 											
 							
-											
+							/*			
 							sql = "INSERT INTO cancelaciones (factura,xml) values (?,?)";
 							dml_stmt = conexion.prepareStatement(sql);
 							
@@ -418,7 +489,7 @@ public class CancelarComprobanteServlet extends HttpServlet {
 							
 							EnviarCorreo.enviarCancelacion(
 									correoReceptor, serie + folio, uuid, rfc, razon);
-
+							*/
 							
 							
 							cancelada = true;			

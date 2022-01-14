@@ -22,7 +22,9 @@ public class Cancelacion_ServiceLocator extends org.apache.axis.client.Service i
     }
 
     // Use to get a proxy class for CancelacionPort
-    private java.lang.String CancelacionPort_address = "https://sat.sifei.com.mx:9000/CancelacionSIFEI/Cancelacion";
+    //private java.lang.String CancelacionPort_address = "https://sat.sifei.com.mx:9000/CancelacionSIFEI/Cancelacion";
+    
+    private java.lang.String CancelacionPort_address = "http://devcfdi.sifei.com.mx:8080/CancelacionSIFEI/Cancelacion";
 
     public java.lang.String getCancelacionPortAddress() {
         return CancelacionPort_address;

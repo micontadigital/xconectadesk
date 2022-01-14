@@ -22,8 +22,10 @@ public class SIFEIServiceLocator extends org.apache.axis.client.Service implemen
     }
 
     // Use to get a proxy class for SIFEIPort
-//    private java.lang.String SIFEIPort_address = "http://devcfdi.sifei.com.mx:8080/SIFEI33/SIFEI";
-    private java.lang.String SIFEIPort_address = "https://sat.sifei.com.mx:8443/SIFEI/SIFEI";
+
+    //private java.lang.String SIFEIPort_address = "https://sat.sifei.com.mx:8443/SIFEI/SIFEI";
+    
+    private java.lang.String SIFEIPort_address = "https://devcfdi.sifei.com.mx:8443/SIFEI33/SIFEI";   //desarrollo
 
 
     public java.lang.String getSIFEIPortAddress() {

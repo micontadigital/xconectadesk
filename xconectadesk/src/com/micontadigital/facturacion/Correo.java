@@ -60,7 +60,7 @@ public class Correo {
 
 			BodyPart cuerpoMensaje = new MimeBodyPart();
 			
-			cuerpoMensaje.setContent(com.idalytec.cfdidesk.Correo.getMensajeFacturacion(empresa), "text/html");
+			cuerpoMensaje.setContent(com.idalytec.cfdidesk.Correo1.getMensajeFacturacion(empresa), "text/html");
 				//cuerpoMensaje.setText(com.micontadigital.controller.Correo.getMensajeFacturacion(empresa));
 			
 			String pdfFileName = rfcEmisor + "_" + serie + folio + ".pdf";
@@ -156,7 +156,7 @@ public class Correo {
 					+ "\n\n";
 					
 			
-			cuerpoMensaje.setContent(com.idalytec.cfdidesk.Correo.getMensajeFacturacion(empresa), "text/html");
+			cuerpoMensaje.setContent(com.idalytec.cfdidesk.Correo1.getMensajeFacturacion(empresa), "text/html");
 				
 						
 			String pdfFileName = rfcEmisor + "_" + serie + folio + ".pdf";
@@ -261,7 +261,7 @@ public class Correo {
 					+ " ha sido cancelado.\n\n"
 					+ "UUID SAT: " + uuid + "\n\n\n";
 			
-			cuerpoMensaje.setContent(com.idalytec.cfdidesk.Correo.getMensajeCancelacion(mensaje), "text/html");
+			cuerpoMensaje.setContent(com.idalytec.cfdidesk.Correo1.getMensajeCancelacion(mensaje), "text/html");
 	
 			
 			Multipart multiparte = new MimeMultipart();

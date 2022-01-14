@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -37,7 +39,7 @@ public class ObtenDisponiblesSadpymeServlet extends HttpServlet {
 		String pass = request.getParameter("pass");
 		String correo = request.getParameter("correo");
 		
-		Connection conn = MariaDBSadpyme.GetConnection("localhost","usrusuarios","AccesoUsuarios01","usuarios_sadpyme");
+		Connection conn = MariaDB.getConexion();
 		Statement st = null;
 		ResultSet rs = null;
 		ResultSet rs1 = null;
@@ -46,57 +48,78 @@ public class ObtenDisponiblesSadpymeServlet extends HttpServlet {
 			
 			st = conn.createStatement();
 			
-			sql = "select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local from usuarios where usuario='" + correo + "' and pass='" + pass + "'" ;
-			
-			System.out.println(sql);
-			
-			rs = st.executeQuery(sql);
-			
 			int idUsuario = 0;
 			
+			sql = ("select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local, id_sucursal, id_terminal"
+					+ ", id_usuario_local, tipo, woo_activo from usuarios "
+					+ "where usuario='" + correo + "' and pass='" + pass + "'" );
+        	
+    		System.out.println(sql);
+        	rs = st.executeQuery(sql);
+        	
+        	while (rs.next()) {
+        		idUsuario = rs.getInt(1);
+        		
+        		
+        		
+        	}
+        	            	
+        	rs = st.executeQuery(sql);
+			
+			int WooActivo = 0;
+			
+			Usuario u  = null;
+			
 			while (rs.next()){
+				u = new Usuario();
 				
-				idUsuario = rs.getInt(1);
-				
+				u.setId(rs.getInt(1));
+				u.setNombreBD(rs.getString(2));
+				u.setUsrBD(rs.getString(3));
+				u.setPassBD(rs.getString(4));
+				//u.setNombre(name);
+				//u.setNick(usuario);
+    		
 			}
 			
-			sql = "select id, description, referencia, vigencia from mp where status='approved'"
-					+ " and usuario=" + idUsuario + " and vigencia>=now() order by vigencia,id" ;
-					
-			System.out.println(sql);
+			Connection conexionUsr = null;
+			
+			int cantidad = 0;
+			int facturas = 0;
+    		
+        	conexionUsr = MariaDBSadpyme.GetConnection("app.xconecta.com", u.getUsrBD(), u.getPassBD(), u.getNombreBD());
+        	Statement stUsr = conexionUsr.createStatement();
+			
+			Date fecha = new Date();
+			sql = "select cantidad, fecha from conekta_ordenes where concepto='FACTURAS'"
+					+ " and usuario=" + u.getId()
+					+ " and status in ('paid','active') and ADDDATE(fecha, INTERVAL 1 MONTH)>=now()";
 			
 			st = conn.createStatement();
+			System.out.println(sql);
 			rs = st.executeQuery(sql);
-			
-			int disponibles = 0;
-			
-			while (rs.next()){
-				int idServicio = rs.getInt(1);
-				String referencia =  rs.getString(3);
-				int cant = 0;
-				if (referencia.indexOf("FAC")!=-1) {
-					cant = Integer.parseInt(referencia.replace("FAC", ""));
-					
+			int x = 0;
+			while (rs.next()) {
+				cantidad += rs.getInt(1);
+				if (x==0) {
+					fecha = rs.getDate(2);
 				}
-				
-				sql = "select count(id) from facturas_mp where id_mp=" + idServicio;
-				
-				System.out.println(sql);
-				
-				rs1 = st.executeQuery(sql);
-				int facturas = 0;
-				while (rs1.next()) {
-					facturas = rs1.getInt(1);
-				}
-				
-				disponibles += (cant - facturas);
-				
-				System.out.println("disponibles " + cant + " " + facturas);
-				
 			}
 			
+				
 			
-			response.getWriter().append(String.valueOf(disponibles));
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+			sql = "select count(id) from pv_facturas_finkok where fecha>STR_TO_DATE('" + sdf.format(fecha) + "','DD-MM-YYYY')";
+			st = conexionUsr.createStatement();
+			System.out.println(sql);
+			rs = stUsr.executeQuery(sql);
+			while (rs.next()) {
+				facturas = rs.getInt(1);
+			}
+				
+			
+			
+			response.getWriter().append(String.valueOf(cantidad- facturas));
 			
 			
 		} catch (SQLException e){

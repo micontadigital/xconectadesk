@@ -55,33 +55,54 @@ public class ObtenFolioServlet extends HttpServlet {
 		try {
 			st = conexion.createStatement();
 			
-			sql = "select id from usuarios where correo='" + correo + "' and password='" + pass + "'" ;
-        	
-        	rs = st.executeQuery(sql);
-        	
-        	while (rs.next()) {
-        		idUsuario = rs.getString(1);
-        	}
-        	
-        	
-        	if (idUsuario.length()>0){
 			
+        		sql = ("select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local, id_sucursal, id_terminal"
+    					+ ", id_usuario_local, tipo, woo_activo from usuarios "
+    					+ "where usuario='" + correo + "' and pass='" + pass + "'" );
+            	
+        		System.out.println(sql);
+            	rs = st.executeQuery(sql);
+            	
+            	while (rs.next()) {
+            		idUsuario = rs.getString(1);
+            		
+            		
+            		
+            	}
+            	            	
+            	rs = st.executeQuery(sql);
+    			
+    			int WooActivo = 0;
+    			
+    			Usuario u  = null;
+    			
+    			while (rs.next()){
+    				u = new Usuario();
+    				
+    				u.setId(rs.getInt(1));
+    				u.setNombreBD(rs.getString(2));
+    				u.setUsrBD(rs.getString(3));
+    				u.setPassBD(rs.getString(4));
+    				//u.setNombre(name);
+    				//u.setNick(usuario);
+        		
+    			}
+    			
+    			Connection conexionUsr = null;
+        		
+            	conexionUsr = MariaDBSadpyme.GetConnection("app.xconecta.com", u.getUsrBD(), u.getPassBD(), u.getNombreBD());
+            	Statement stUsr = conexionUsr.createStatement();
 			
-			
-        		sql = "select ifnull(max(folio),0)+1 from facturas where usuario=" + idUsuario;
+        		sql = "select ifnull(max(folio),0)+1 from pv_facturas_finkok";
 
-        		rs = st.executeQuery(sql);
+        		rs = stUsr.executeQuery(sql);
         		int facturas=0;
         		while (rs.next()) {
         			facturas = rs.getInt(1);
         		}
         		
         		response.getWriter().append(String.valueOf(facturas));
-        	} else {
-        		
-        		response.getWriter().append(String.valueOf(1));
-        		
-        	}
+        	
 
 		} catch (SQLException e) {
             // TODO Auto-generated catch block
