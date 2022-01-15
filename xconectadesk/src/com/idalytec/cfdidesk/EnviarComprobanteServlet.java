@@ -38,6 +38,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.json.JSONObject;
 import org.xml.sax.InputSource;
 
 import com.idalytec.sadpyme.facturacion.CorreoFormato;
@@ -96,7 +97,13 @@ public class EnviarComprobanteServlet extends HttpServlet {
 		String pass = request.getParameter("pass");
 		String correo = request.getParameter("correo");
 		String idComprobante = request.getParameter("idComprobante");
-		String destino = request.getParameter("correoReceptor");
+		//String destino = request.getParameter("correoReceptor");
+		
+		String jsonReceptor = request.getParameter("jsonReceptor");
+		
+		JSONObject receptor = new JSONObject(jsonReceptor);
+		
+		String destino = receptor.getString("correo");
 		
 		
 		String imageQR = null;
@@ -110,7 +117,7 @@ public class EnviarComprobanteServlet extends HttpServlet {
 		Usuario u = null;
 		
 		
-		
+		/*
 		String calle = URLDecoder.decode(request.getParameter("calle"), "UTF-8");
 		String numeroExterior = URLDecoder.decode(request.getParameter("numeroExterior"), "UTF-8");;
 		String numeroInterior = URLDecoder.decode(request.getParameter("numeroInterior"), "UTF-8");
@@ -118,7 +125,7 @@ public class EnviarComprobanteServlet extends HttpServlet {
 		String municipio = URLDecoder.decode(request.getParameter("municipio"), "UTF-8");
 		String estado = URLDecoder.decode(request.getParameter("estado"), "UTF-8");
 		String codigoPostal = URLDecoder.decode(request.getParameter("codigoPostal"), "UTF-8");
-		
+		*/
 		
 		
 		correo = URLDecoder.decode(correo, "UTF-8");
@@ -240,7 +247,9 @@ public class EnviarComprobanteServlet extends HttpServlet {
         	
         		Comprobante comprobante = null;
         		com.idalytec.test.Emisor emisor = new com.idalytec.test.Emisor();
-    			com.idalytec.test.Receptor receptor = new com.idalytec.test.Receptor();
+    			
+        		/*
+        		com.idalytec.test.Receptor receptor = new com.idalytec.test.Receptor();
     		
             	receptor.setCalle(calle);
             	receptor.setNumeroExterior(numeroExterior);
@@ -249,7 +258,7 @@ public class EnviarComprobanteServlet extends HttpServlet {
             	receptor.setMunicipio(municipio);
             	receptor.setEstado(estado);
             	receptor.setCodigoPostal(Integer.parseInt(codigoPostal));
-            	
+            	*/
             	
             	
             	DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -360,7 +369,7 @@ public class EnviarComprobanteServlet extends HttpServlet {
         			
         		}
         		
-        		int idFactura = guardaFactura(file,conexionUsr,conexionUsr, u ,new Receptor(), new Emisor());
+        		int idFactura = guardaFactura(file,conexionUsr,conexionUsr, u ,receptor, new Emisor());
         		imageQR = IP.getDir() + "qr" + idFactura + u.getNombreBD() + ".jpg";
         		
         		System.out.println(idFactura);
@@ -501,7 +510,8 @@ public class EnviarComprobanteServlet extends HttpServlet {
 	
 	
 	
-	public int guardaFactura(File file,Connection dataSourceTpv,Connection dataSourceCfdi, Usuario u, Receptor receptor, Emisor emisor) {
+	public int guardaFactura(File file,Connection dataSourceTpv,Connection dataSourceCfdi, Usuario u
+			, JSONObject receptor, Emisor emisor) {
 
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -823,8 +833,13 @@ public class EnviarComprobanteServlet extends HttpServlet {
 					dml_stmt.setString(46, f33.getEmisor().getRegimenFiscal());
 					
 					dml_stmt.setString(47, NumberToLetterConverter.convertNumberToLetter(String.valueOf(f33.getTotal())));
-					dml_stmt.setString(48, receptor.getCalle() + " " + receptor.getNumeroExterior() + " " + receptor.getNumeroInterior()
-											+ receptor.getColonia() + " " + receptor.getMunicipio() + " " + receptor.getEstado() + " C.P. " + receptor.getCodigoPostal());
+					
+					
+					dml_stmt.setString(48, receptor.getString("calle") + " " + receptor.getString("exterior") 
+					+ " " + receptor.getString("interior") + receptor.getString("colonia") 
+					+ " " + receptor.getString("municipio") + " " + receptor.getString("estado") 
+					+ " C.P. " + receptor.getString("cp"));
+					
 					
 					dml_stmt.executeUpdate();
 					

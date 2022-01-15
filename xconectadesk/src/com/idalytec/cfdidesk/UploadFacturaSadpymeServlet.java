@@ -183,11 +183,153 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 				
 			}
 			
+			org.json.JSONObject receptor = null;
+			org.json.JSONObject emisor = null;
+			
+			if (items.size()>9){
+				FileItem receptorItem = (FileItem) items.get(9);
+				receptor =  new org.json.JSONObject(receptorItem.getString().trim());
+				
+				
+			}
+			
+			if (items.size()>10){
+				FileItem emisorItem = (FileItem) items.get(10);
+				emisor =  new org.json.JSONObject(emisorItem.getString().trim());
+				
+				
+			}
+			
+			
 			System.out.println("metodo de pago " + metodoPago);
 
 			try{
 
-				st = conexion.createStatement();
+				Connection conn = MariaDB.getConexion();
+				
+				
+				st = conn.createStatement();
+				
+				sql = ("select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local, id_sucursal, id_terminal"
+						+ ", id_usuario_local, tipo, woo_activo from usuarios "
+						+ "where usuario='" + correo + "' and pass='" + pass + "'" );
+	        	
+	    		System.out.println(sql);
+	        	rs = st.executeQuery(sql);
+	        	
+	        	while (rs.next()) {
+	        		idUsuario = rs.getInt(1);
+	        		
+	        		
+	        		
+	        	}
+	        	            	
+	        	rs = st.executeQuery(sql);
+				
+				int WooActivo = 0;
+				
+				Usuario u  = null;
+				
+				while (rs.next()){
+					u = new Usuario();
+					
+					u.setId(rs.getInt(1));
+					u.setNombreBD(rs.getString(2));
+					u.setUsrBD(rs.getString(3));
+					u.setPassBD(rs.getString(4));
+					//u.setNombre(name);
+					//u.setNick(usuario);
+	    		
+				}
+				
+				Connection conexionUsr = null;
+	    		
+	        	conexionUsr = MariaDBSadpyme.GetConnection("app.xconecta.com", u.getUsrBD(), u.getPassBD(), u.getNombreBD());
+	        	Statement stUsr = conexionUsr.createStatement();
+	        	
+	        	sql = "update pv_empresas set rfc=?, razon_social=?"
+	        			+ ",calle=?"
+	        			+ ",numero_exterior=?"
+	        			+ ",numero_interior=?"
+	        			+ ",colonia=?"
+	        			+ ",municipio=?"
+	        			+ ",estado=?"
+	        			+ ",codigo_postal=?"
+	        			+ " where id=1";
+	        	
+	        	dml_stmt = conexionUsr.prepareStatement(sql);
+	        	dml_stmt.setString(1, emisor.getString("rfc"));
+	        	dml_stmt.setString(2, emisor.getString("nombre"));
+	        	dml_stmt.setString(3, emisor.getString("calle"));
+	        	dml_stmt.setString(4, emisor.getString("exterior"));
+	        	dml_stmt.setString(5, emisor.getString("interior"));
+	        	dml_stmt.setString(6, emisor.getString("colonia"));
+	        	dml_stmt.setString(7, emisor.getString("municipio"));
+	        	dml_stmt.setString(8, emisor.getString("estado"));
+	        	dml_stmt.setString(9, emisor.getString("cp"));
+	        	
+	        	dml_stmt.executeUpdate();
+	        	
+	        	
+	        	sql = "select id from pv_clientes where id=" + receptor.getInt("id");
+	        	
+	        	rs  = stUsr.executeQuery(sql);
+	        	
+	        	boolean existeCliente = false;
+	        	
+	        	while (rs.next()) {
+	        		existeCliente = true;
+	        		
+	        	}
+	        	if (!existeCliente) {
+	        		sql = "insert into pv_clientes (rfc,razon_social,calle,numero_exterior"
+	        				+ ",numero_interior,colonia,municipio,estado,codigo_postal,email) "
+	        				+ "values (?,?,?,?,?,?,?,?,?,?)";
+	        		
+	        		dml_stmt = conexionUsr.prepareStatement(sql);
+		        	dml_stmt.setString(1, receptor.getString("rfc"));
+		        	dml_stmt.setString(2, receptor.getString("nombre"));
+		        	dml_stmt.setString(3, receptor.getString("calle"));
+		        	dml_stmt.setString(4, receptor.getString("exterior"));
+		        	dml_stmt.setString(5, receptor.getString("interior"));
+		        	dml_stmt.setString(6, receptor.getString("colonia"));
+		        	dml_stmt.setString(7, receptor.getString("municipio"));
+		        	dml_stmt.setString(8, receptor.getString("estado"));
+		        	dml_stmt.setString(9, receptor.getString("cp"));
+		        	dml_stmt.setString(10, receptor.getString("correo"));
+		        	
+		        	dml_stmt.executeUpdate();
+	        		
+	        	} else {
+	        		
+	        		sql = "update pv_clientes set rfc=?, razon_social=?"
+		        			+ ",calle=?"
+		        			+ ",numero_exterior=?"
+		        			+ ",numero_interior=?"
+		        			+ ",colonia=?"
+		        			+ ",municipio=?"
+		        			+ ",estado=?"
+		        			+ ",codigo_postal=?"
+		        			+ ",email=?"
+		        			+ " where id=" + receptor.getInt("id");
+	        		
+	        		dml_stmt = conexionUsr.prepareStatement(sql);
+		        	dml_stmt.setString(1, receptor.getString("rfc"));
+		        	dml_stmt.setString(2, receptor.getString("nombre"));
+		        	dml_stmt.setString(3, receptor.getString("calle"));
+		        	dml_stmt.setString(4, receptor.getString("exterior"));
+		        	dml_stmt.setString(5, receptor.getString("interior"));
+		        	dml_stmt.setString(6, receptor.getString("colonia"));
+		        	dml_stmt.setString(7, receptor.getString("municipio"));
+		        	dml_stmt.setString(8, receptor.getString("estado"));
+		        	dml_stmt.setString(9, receptor.getString("cp"));
+		        	dml_stmt.setString(10, receptor.getString("correo"));
+		        	
+		        	dml_stmt.executeUpdate();
+	        		
+	        		
+	        	}
+	        	
 
 				
 				idUsuario = obtenerDisponibles(correo, pass, 2);
@@ -416,47 +558,7 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 								
 							
 							
-							Connection conn = MariaDB.getConexion();
-						
-								
-								st = conn.createStatement();
-								
-								sql = ("select id,nombre_bd,usr_bd,pass_bd,usuario, empresa, local, id_sucursal, id_terminal"
-										+ ", id_usuario_local, tipo, woo_activo from usuarios "
-										+ "where usuario='" + correo + "' and pass='" + pass + "'" );
-					        	
-					    		System.out.println(sql);
-					        	rs = st.executeQuery(sql);
-					        	
-					        	while (rs.next()) {
-					        		idUsuario = rs.getInt(1);
-					        		
-					        		
-					        		
-					        	}
-					        	            	
-					        	rs = st.executeQuery(sql);
-								
-								int WooActivo = 0;
-								
-								Usuario u  = null;
-								
-								while (rs.next()){
-									u = new Usuario();
-									
-									u.setId(rs.getInt(1));
-									u.setNombreBD(rs.getString(2));
-									u.setUsrBD(rs.getString(3));
-									u.setPassBD(rs.getString(4));
-									//u.setNombre(name);
-									//u.setNick(usuario);
-					    		
-								}
-								
-								Connection conexionUsr = null;
-					    		
-					        	conexionUsr = MariaDBSadpyme.GetConnection("app.xconecta.com", u.getUsrBD(), u.getPassBD(), u.getNombreBD());
-					        	Statement stUsr = conexionUsr.createStatement();
+							
 							
 								
 								sql = "select ifnull(max(id),0) + 1 from pv_facturas_finkok";
@@ -470,14 +572,15 @@ public class UploadFacturaSadpymeServlet extends HttpServlet {
 								}
 				
 			
-								sql = "insert into pv_facturas_finkok (uuid, xml, cliente, status, serie, folio, cod_status, incidencia, total, id, iva) "
+								sql = "insert into pv_facturas_finkok (uuid, xml, cliente, status, serie, folio, cod_status"
+										+ ", incidencia, total, id, iva) "
 										+ " values (?,?,?,?,?, ?,?,?,?,?, ?)";
 			
 								dml_stmt = conexionUsr.prepareStatement(sql);
 								
 								dml_stmt.setString(1, ( (t33!=null)?t33.getUUID():"") );
 								dml_stmt.setString(2, readFile(newFile.getAbsolutePath()));
-								dml_stmt.setInt(3, 1);
+								dml_stmt.setInt(3, receptor.getInt("id"));
 								dml_stmt.setInt(4, 1);
 								dml_stmt.setString(5, f33.getSerie());
 								dml_stmt.setString(6, f33.getFolio());
